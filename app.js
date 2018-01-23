@@ -1,4 +1,5 @@
 var express = require('express'),
+    fs = require('fs'),
     path = require('path'),
     favicon = require('serve-favicon'),
     logger = require('morgan'),
@@ -27,7 +28,7 @@ app.use(cookieParser());
 app.use(session({
   secret: settings.cookieSecret,
   key: settings.db,
-  cookie: {maxAge: 30 * 24 * 60 * 60 * 1000},
+  cookie: {maxAge: 60 * 60 * 1000},
   store: new MongoStore({
     url: `mongodb://localhost:${settings.port}/${settings.db}`
   }),

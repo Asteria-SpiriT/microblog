@@ -1,19 +1,45 @@
 var express = require('express'),
     router = express.Router(),
     crypto = require('crypto'),
-    User = require('../models/user');
+    User = require('../models/user'),
+    Post = require('../models/post');
 
 /* GET home page. */
 router.get('/', (req, res, next) => {
-  res.render('index', { 
-    title: '首页' 
+  Post.get(null, (err, posts) => {
+    if(err) {
+      posts = [];
+    }
+    res.render('index', {
+      title: '首页',
+      posts: posts
+    });
   });
 });
 
+router.post('/post', checkLogin);
+
 /* GET post page. */
-router.get('/post', (req, res, next) => {
-  res.send('respond with a resource');
+router.post('/post', (req, res, next) => {
+  var currentUser = req.session.user;
+  if(req.body.post == ''){
+    req.flash('error', '发布信息不能为空!');
+    return res.redirect('/');
+  }
+  let post = new Post(currentUser.name, req.body.post);//req.body.post 获取用户发表的内容
+
+  post.save( (err) => {
+    if(err){
+      req.flash('error', err);
+      return res.redirect('/');
+    }
+
+    req.flash('success', '发表成功!');
+    res.redirect('/');
+  })
 });
+
+router.get('/reg', checkNotLogin);
 
 /* GET reg page. */
 router.get('/reg', (req, res, next) => {
@@ -21,6 +47,8 @@ router.get('/reg', (req, res, next) => {
     title: '用户注册'
   })
 });
+
+router.post('/reg', checkNotLogin);
 /* POST reg page. */
 router.post('/reg', (req, res, next) => {
   if(req.body.username == '' || req.body.password_repeat == '' ||  req.body.password == ''){
@@ -65,7 +93,23 @@ router.post('/reg', (req, res, next) => {
 });
 
 router.get('/user/:username', (req, res, next) => {
-  res.send(`user: ${req.params.username}`);
+  User.get(req.params.username, (err, user) => {
+    if(!user){
+      req.flash('error', '用户不存在!');
+      return res.redirect('/');
+    }
+
+    Post.get(user.name, (err, posts) => {
+      if(err){
+        req.flash('error', err);
+        return res.redirect('/');
+      }
+      res.render('user', {
+        title: user.name,
+        posts: posts
+      })
+    })
+  })
 });
 
 /* GET login page. */
@@ -100,9 +144,25 @@ router.post('/login', (req, res, next) => {
 
 /* GET logout page. */
 router.get('/logout', (req, res, next) => {
-  res.session.user = null;//清空session
+  req.session.user = null;//清空session
   req.flash('success', '注销成功!');
   res.redirect('/');
 });
+
+function checkNotLogin(req, res, next) {
+  if(req.session.user){
+    req.flash('error', '已登录');
+    return res.redirect('/');
+  }
+  next();
+}
+
+function checkLogin(req, res, next) {
+  if(!req.session.user){
+    req.flash('error', '未登录');
+    return res.redirect('/login');
+  }
+  next();
+}
 
 module.exports = router;

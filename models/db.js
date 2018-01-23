@@ -1,6 +1,15 @@
 var settings = require('../settings'),
-    MongoClient = require('mongodb').MongoClient,
-    Connection = require('mongodb').Connection,
-    Server = require('mongodb').Server;
+    MongoClient = require('mongodb').MongoClient;
+var _db;
 
-module.exports = new MongoClient(new Server(settings.host, settings.port));
+module.exports = {
+    connectToDB (callback){
+        MongoClient.connect(`mongodb://${settings.host}:${settings.port}/${settings.db}`, (err, client) => {
+            _db = client;
+            return callback(err, client);
+        })
+    },
+    getDb (){
+        return _db;
+    }
+};

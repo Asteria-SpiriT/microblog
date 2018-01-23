@@ -1,35 +1,19 @@
-<%- include header.ejs %>
-  <div class="jumbotron">
-    <div class="container">
-      <h1>欢迎来到 MicroBlog</h1>
-      <p>这是一个基于Node.js 的微博系统.</p>
-      <p>
-        <a class="btn btn-primary btn-large" href="/login">登录</a>
-        <a class="btn btn-default btn-large" href="/reg">立即注册</a>
-      </p>
-    </div>
-  </div>
-
-  <div class="row">
-    <div class="col-md-4">
-      <h2>默认0说</h2>
-      <p>
-        你说句话不足终结符你回家的机票自己竟然会。
-      </p>
-    </div>
-
-    <div class="col-md-4">
-        <h2>默认1说</h2>
-        <p>
-          你说句话不足终结符你回家的机票自己竟然会。
-        </p>
-      </div>
-
-      <div class="col-md-4">
-          <h2>默认2说</h2>
+<% include header.ejs %>
+  <% include alert.ejs %>
+    <% if (!locals.user) { %>
+      <div class="jumbotron">
+        <div class="container">
+          <h1>欢迎来到 MicroBlog</h1>
+          <p>这是一个基于Node.js 的微博系统.</p>
           <p>
-            你说句话不足终结符你回家的机票自己竟然会。
+            <a class="btn btn-primary btn-large" href="/login">登录</a>
+            <a class="btn btn-default btn-large" href="/reg">立即注册</a>
           </p>
         </div>
-  </div>
-<%- include footer.ejs %>
+      </div>
+    <% } else { %>
+      <% include say.ejs %>
+    <% } %>
+
+    <% include posts.ejs %>
+<% include footer.ejs %>

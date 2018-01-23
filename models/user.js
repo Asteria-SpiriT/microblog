@@ -12,7 +12,7 @@ User.prototype.save = function save(callback) {
         name: this.name,
         password: this.password
     };
-    mongodb.open( (err, client) => {
+    mongodb.connectToDB( (err, client) => {
         if(err){
             return callback(err);
         }
@@ -22,7 +22,7 @@ User.prototype.save = function save(callback) {
         // 读取 users 集合
         db.collection('users', (err, collection) => {
             if(err){
-                mongodb.close();
+                client.close();
                 return callback(err);
             }
 
@@ -30,7 +30,7 @@ User.prototype.save = function save(callback) {
             collection.ensureIndex('name', { unique: true});
             // 写入 user 文档
             collection.insert(user, { safe: true}, (err, user) => {
-                mongodb.close();
+                client.close();
                 callback(err, user);
             });
         });
@@ -38,7 +38,7 @@ User.prototype.save = function save(callback) {
 };
 
 User.get = function get(username, callback) {
-    mongodb.open( (err, db) => {
+    mongodb.connectToDB( (err, client) => {
         if(err){
             return callback(err);
         }
@@ -48,13 +48,13 @@ User.get = function get(username, callback) {
         // 读取 users 集合
         db.collection('users', (err, collection) => {
             if(err){
-                mongodb.close();
+                client.close();
                 return callback(err);
             }
             
             //  查找 name 属性为 username 的文档
             collection.findOne({name: username}, (err, doc) => {
-                mongodb.close();
+                client.close();
                 if(doc){
                     // 封装文档为 User 对象
                     var user = new User(doc);
